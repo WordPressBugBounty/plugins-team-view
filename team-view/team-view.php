@@ -3,7 +3,7 @@
  * Plugin Name: Team View
  * Plugin URI: https://wordpress.org/plugins/team-view/
  * Description: Simple and easy, responsive and mobile friendly plugin to display team members profile.
- * Version: 1.1.3
+ * Version: 1.2
  * Author: WEN Themes
  * Author URI: https://wenthemes.com
  * License: GPL-2.0+
@@ -20,7 +20,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 define( 'TEAM_VIEW_BASENAME', basename( dirname( __FILE__ ) ) );
-define( 'TEAM_VIEW_VERSION', '1.1.3' );
+define( 'TEAM_VIEW_VERSION', '1.2' );
 define( 'TEAM_VIEW_DIR', rtrim( plugin_dir_path( __FILE__ ), '/' ) );
 define( 'TEAM_VIEW_URL', rtrim( plugin_dir_url( __FILE__ ), '/' ) );
 define( 'TEAM_VIEW_LIB_DIR', TEAM_VIEW_DIR . '/lib' );

@@ -61,7 +61,7 @@ class Team_View_Public {
 	 */
 	public function enqueue_styles() {
 
-		wp_enqueue_style( 'font-awesome', TEAM_VIEW_URL . '/lib/font-awesome/css/font-awesome.css', array(), '4.7.0' );
+		wp_enqueue_style( 'font-awesome', TEAM_VIEW_URL . '/lib/font-awesome/css/all.css', array(), '6.7.2' );
 		wp_enqueue_style( $this->plugin_name, TEAM_VIEW_URL . '/public/css/team-view-public.css', array(), $this->version, 'all' );
 
 	}
