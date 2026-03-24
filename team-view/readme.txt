@@ -3,8 +3,8 @@ Contributors: wenthemes
 Donate link: https://wenthemes.com
 Tags: team, member
 Requires at least: 5.9
-Tested up to: 6.8
-Stable tag: trunk
+Tested up to: 6.9
+Stable tag: 2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,6 +50,10 @@ Nice, make a post on the [Support Forum](http://wordpress.org/support/plugin/tea
 2. Display team members
 
 == Changelog ==
+
+= 2.0 - Mar 24 2026 =
+* Fix: WordPress.Security.EscapeOutput.OutputNotEscaped
+* Compatibility tested upto WordPress 6.9
 
 = 1.2 - Jul 28 2025 =
 * Update: Font Awesome 6.7.2

@@ -1,7 +1,7 @@
 <?php
-if ( ! class_exists( 'WP_REST_Controller' ) ) {
+if (! class_exists('WP_REST_Controller')) {
 	// Shim the WP_REST_Controller class if wp-api plugin not installed, & not in core.
-	require_once cmb2_dir( 'includes/shim/WP_REST_Controller.php' );
+	require_once cmb2_dir('includes/shim/WP_REST_Controller.php');
 }
 
 /**
@@ -19,7 +19,8 @@ if ( ! class_exists( 'WP_REST_Controller' ) ) {
  * @license   GPL-2.0+
  * @link      http://webdevstudios.com
  */
-abstract class CMB2_REST_Controller extends WP_REST_Controller {
+abstract class CMB2_REST_Controller extends WP_REST_Controller
+{
 
 	/**
 	 * The namespace of this controller's route.
@@ -95,7 +96,8 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 * Constructor
 	 * @since 2.2.3
 	 */
-	public function __construct( WP_REST_Server $wp_rest_server ) {
+	public function __construct(WP_REST_Server $wp_rest_server)
+	{
 		$this->server = $wp_rest_server;
 	}
 
@@ -112,12 +114,13 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return void
 	 */
-	public function maybe_hook_callback_and_apply_filters( $filter, $default_access ) {
-		if ( ! $this->rest_box && $this->request->get_param( 'cmb_id' ) ) {
-			$this->rest_box = CMB2_REST::get_rest_box( $this->request->get_param( 'cmb_id' ) );
+	public function maybe_hook_callback_and_apply_filters($filter, $default_access)
+	{
+		if (! $this->rest_box && $this->request->get_param('cmb_id')) {
+			$this->rest_box = CMB2_REST::get_rest_box($this->request->get_param('cmb_id'));
 		}
 
-		$default_access = $this->maybe_hook_registered_callback( $filter, $default_access );
+		$default_access = $this->maybe_hook_registered_callback($filter, $default_access);
 
 		/**
 		 * Apply the permissions check filter.
@@ -127,9 +130,9 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 		 * @param bool   $default_access Whether this CMB2 endpoint can be accessed.
 		 * @param object $controller     This CMB2_REST_Controller object.
 		 */
-		$default_access = apply_filters( $filter, $default_access, $this );
+		$default_access = apply_filters($filter, $default_access, $this);
 
-		$this->maybe_unhook_registered_callback( $filter );
+		$this->maybe_unhook_registered_callback($filter);
 
 		return $default_access;
 	}
@@ -148,14 +151,15 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return bool                The possibly-modified filter value (if the '*_cb' param is non-callable).
 	 */
-	public function maybe_hook_registered_callback( $filter, $default_val ) {
-		if ( ! $this->rest_box || is_wp_error( $this->rest_box ) ) {
+	public function maybe_hook_registered_callback($filter, $default_val)
+	{
+		if (! $this->rest_box || is_wp_error($this->rest_box)) {
 			return $default_val;
 		}
 
 		// Hook box specific filter callbacks.
-		$val = $this->rest_box->cmb->maybe_hook_parameter( $filter, $default_val );
-		if ( null !== $val ) {
+		$val = $this->rest_box->cmb->maybe_hook_parameter($filter, $default_val);
+		if (null !== $val) {
 			$default_val = $val;
 		}
 
@@ -171,13 +175,14 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return void
 	 */
-	public function maybe_unhook_registered_callback( $filter ) {
-		if ( ! $this->rest_box || is_wp_error( $this->rest_box ) ) {
+	public function maybe_unhook_registered_callback($filter)
+	{
+		if (! $this->rest_box || is_wp_error($this->rest_box)) {
 			return;
 		}
 
 		// Unhook box specific filter callbacks.
-		$this->rest_box->cmb->maybe_hook_parameter( $filter, null, 'remove_filter' );
+		$this->rest_box->cmb->maybe_hook_parameter($filter, null, 'remove_filter');
 	}
 
 	/**
@@ -188,8 +193,9 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 * @param  mixed $data
 	 * @return array $data
 	 */
-	public function prepare_item( $data ) {
-		return $this->prepare_item_for_response( $data, $this->request );
+	public function prepare_item($data)
+	{
+		return $this->prepare_item_for_response($data, $this->request);
 	}
 
 	/**
@@ -200,11 +206,12 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 * @param  mixed $cb Callable function/method.
 	 * @return mixed     Results of output buffer after calling function/method.
 	 */
-	public function get_cb_results( $cb ) {
+	public function get_cb_results($cb)
+	{
 		$args = func_get_args();
-		array_shift( $args ); // ignore $cb
+		array_shift($args); // ignore $cb
 		ob_start();
-		call_user_func_array( $cb, $args );
+		call_user_func_array($cb, $args);
 
 		return ob_get_clean();
 	}
@@ -218,8 +225,9 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 * @param  WP_REST_Request  $request  Request object.
 	 * @return WP_REST_Response $response
 	 */
-	public function prepare_item_for_response( $data, $request = null ) {
-		$data = $this->filter_response_by_context( $data, $this->request['context'] );
+	public function prepare_item_for_response($data, $request = null)
+	{
+		$data = $this->filter_response_by_context($data, $this->request['context']);
 
 		/**
 		 * Filter the prepared CMB2 item response.
@@ -230,7 +238,7 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 		 * @param object $request        The WP_REST_Request object
 		 * @param object $cmb2_endpoints This endpoints object
 		 */
-		return apply_filters( 'cmb2_rest_prepare', rest_ensure_response( $data ), $this->request, $this );
+		return apply_filters('cmb2_rest_prepare', rest_ensure_response($data), $this->request, $this);
 	}
 
 	/**
@@ -243,11 +251,12 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return void
 	 */
-	protected function initiate_rest_read_box( $request, $request_type ) {
-		$this->initiate_rest_box( $request, $request_type );
+	protected function initiate_rest_read_box($request, $request_type)
+	{
+		$this->initiate_rest_box($request, $request_type);
 
-		if ( ! is_wp_error( $this->rest_box ) && ! $this->rest_box->rest_read ) {
-			$this->rest_box = new WP_Error( 'cmb2_rest_no_read_error', __( 'This box does not have read permissions.', 'team-view' ), array( 'status' => 403 ) );
+		if (! is_wp_error($this->rest_box) && ! $this->rest_box->rest_read) {
+			$this->rest_box = new WP_Error('cmb2_rest_no_read_error', __('This box does not have read permissions.', 'team-view'), array('status' => 403));
 		}
 	}
 
@@ -261,11 +270,12 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return void
 	 */
-	protected function initiate_rest_edit_box( $request, $request_type ) {
-		$this->initiate_rest_box( $request, $request_type );
+	protected function initiate_rest_edit_box($request, $request_type)
+	{
+		$this->initiate_rest_box($request, $request_type);
 
-		if ( ! is_wp_error( $this->rest_box ) && ! $this->rest_box->rest_edit ) {
-			$this->rest_box = new WP_Error( 'cmb2_rest_no_write_error', __( 'This box does not have write permissions.', 'team-view' ), array( 'status' => 403 ) );
+		if (! is_wp_error($this->rest_box) && ! $this->rest_box->rest_edit) {
+			$this->rest_box = new WP_Error('cmb2_rest_no_write_error', __('This box does not have write permissions.', 'team-view'), array('status' => 403));
 		}
 	}
 
@@ -279,23 +289,23 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return void
 	 */
-	protected function initiate_rest_box( $request, $request_type ) {
-		$this->initiate_request( $request, $request_type );
+	protected function initiate_rest_box($request, $request_type)
+	{
+		$this->initiate_request($request, $request_type);
 
-		$this->rest_box = CMB2_REST::get_rest_box( $this->request->get_param( 'cmb_id' ) );
+		$this->rest_box = CMB2_REST::get_rest_box($this->request->get_param('cmb_id'));
 
-		if ( ! $this->rest_box ) {
+		if (! $this->rest_box) {
 
-			$this->rest_box = new WP_Error( 'cmb2_rest_box_not_found_error', __( 'No box found by that id. A box needs to be registered with the "show_in_rest" parameter configured.', 'team-view' ), array( 'status' => 403 ) );
-
+			$this->rest_box = new WP_Error('cmb2_rest_box_not_found_error', __('No box found by that id. A box needs to be registered with the "show_in_rest" parameter configured.', 'team-view'), array('status' => 403));
 		} else {
 
-			if ( isset( $this->request['object_id'] ) ) {
-				$this->rest_box->cmb->object_id( sanitize_text_field( $this->request['object_id'] ) );
+			if (isset($this->request['object_id'])) {
+				$this->rest_box->cmb->object_id(sanitize_text_field($this->request['object_id']));
 			}
 
-			if ( isset( $this->request['object_type'] ) ) {
-				$this->rest_box->cmb->object_type( sanitize_text_field( $this->request['object_type'] ) );
+			if (isset($this->request['object_type'])) {
+				$this->rest_box->cmb->object_type(sanitize_text_field($this->request['object_type']));
 			}
 		}
 	}
@@ -310,18 +320,19 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return void
 	 */
-	public function initiate_request( $request, $request_type ) {
+	public function initiate_request($request, $request_type)
+	{
 		$this->request = $request;
 
-		if ( ! isset( $this->request['context'] ) || empty( $this->request['context'] ) ) {
+		if (! isset($this->request['context']) || empty($this->request['context'])) {
 			$this->request['context'] = 'view';
 		}
 
-		if ( ! self::$request_type ) {
+		if (! self::$request_type) {
 			self::$request_type = $request_type;
 		}
 
-		if ( ! self::$route ) {
+		if (! self::$route) {
 			self::$route = $this->request->get_route();
 		}
 	}
@@ -333,7 +344,8 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return string  Initial requested type.
 	 */
-	public static function get_intial_request_type() {
+	public static function get_intial_request_type()
+	{
 		return self::$request_type;
 	}
 
@@ -344,7 +356,8 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return string  Initial requested route.
 	 */
-	public static function get_intial_route() {
+	public static function get_intial_route()
+	{
 		return self::$route;
 	}
 
@@ -355,31 +368,32 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return array
 	 */
-	public function get_item_schema() {
+	public function get_item_schema()
+	{
 		$schema = array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
 			'title'                => 'CMB2',
 			'type'                 => 'object',
 			'properties'           => array(
 				'description' => array(
-					'description'  => __( 'A human-readable description of the object.', 'team-view' ),
+					'description'  => __('A human-readable description of the object.', 'team-view'),
 					'type'         => 'string',
-					'context'      => array( 'view' ),
-					),
-					'name'             => array(
-						'description'  => __( 'The id for the object.', 'team-view' ),
-						'type'         => 'integer',
-						'context'      => array( 'view' ),
-					),
+					'context'      => array('view'),
+				),
+				'name'             => array(
+					'description'  => __('The id for the object.', 'team-view'),
+					'type'         => 'integer',
+					'context'      => array('view'),
+				),
 				'name' => array(
-					'description'  => __( 'The title for the object.', 'team-view' ),
+					'description'  => __('The title for the object.', 'team-view'),
 					'type'         => 'string',
-					'context'      => array( 'view' ),
+					'context'      => array('view'),
 				),
 			),
 		);
 
-		return $this->add_additional_fields_schema( $schema );
+		return $this->add_additional_fields_schema($schema);
 	}
 
 	/**
@@ -393,7 +407,7 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return array          Array of links
 	 */
-	abstract protected function prepare_links( $object );
+	abstract protected function prepare_links($object);
 
 	/**
 	 * Get whitelisted query strings from URL for appending to link URLS.
@@ -402,7 +416,8 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return string URL query stringl
 	 */
-	public function get_query_string() {
+	public function get_query_string()
+	{
 		$defaults = array(
 			'object_id'   => 0,
 			'object_type' => '',
@@ -412,11 +427,11 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 
 		$query_string = '';
 
-		foreach ( $defaults as $key => $value ) {
-			if ( isset( $this->request[ $key ] ) ) {
+		foreach ($defaults as $key => $value) {
+			if (isset($this->request[$key])) {
 				$query_string .= $query_string ? '&' : '?';
 				$query_string .= $key;
-				if ( $value = sanitize_text_field( $this->request[ $key ] ) ) {
+				if ($value = sanitize_text_field($this->request[$key])) {
 					$query_string .= '=' . $value;
 				}
 			}
@@ -424,5 +439,4 @@ abstract class CMB2_REST_Controller extends WP_REST_Controller {
 
 		return $query_string;
 	}
-
 }

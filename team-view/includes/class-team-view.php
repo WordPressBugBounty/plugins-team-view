@@ -1,5 +1,9 @@
 <?php
 
+if (! defined('ABSPATH')) {
+	exit; // Exit if accessed directly
+}
+
 /**
  * The file that defines the core plugin class
  *
@@ -13,21 +17,8 @@
  * @subpackage Team_View/includes
  */
 
-/**
- * The core plugin class.
- *
- * This is used to define internationalization, admin-specific hooks, and
- * public-facing site hooks.
- *
- * Also maintains the unique identifier of this plugin as well as the current
- * version of the plugin.
- *
- * @since      1.0.0
- * @package    Team_View
- * @subpackage Team_View/includes
- * @author     WEN Themes <info@wenthemes.com>
- */
-class Team_View {
+class Team_View
+{
 
 	/**
 	 * The loader that's responsible for maintaining and registering all hooks that power
@@ -66,7 +57,8 @@ class Team_View {
 	 *
 	 * @since    1.0.0
 	 */
-	public function __construct() {
+	public function __construct()
+	{
 
 		$this->plugin_name = 'team-view';
 		$this->version = TEAM_VIEW_VERSION;
@@ -75,7 +67,6 @@ class Team_View {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
-
 	}
 
 	/**
@@ -94,33 +85,33 @@ class Team_View {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function load_dependencies() {
+	private function load_dependencies()
+	{
 
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-team-view-loader.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-team-view-loader.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-team-view-i18n.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-team-view-i18n.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-team-view-admin.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-team-view-admin.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-team-view-public.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-team-view-public.php';
 
 		$this->loader = new Team_View_Loader();
-
 	}
 
 	/**
@@ -132,12 +123,12 @@ class Team_View {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function set_locale() {
+	private function set_locale()
+	{
 
 		$plugin_i18n = new Team_View_i18n();
 
-		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
-
+		$this->loader->add_action('plugins_loaded', $plugin_i18n, 'load_plugin_textdomain');
 	}
 
 	/**
@@ -147,20 +138,20 @@ class Team_View {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_admin_hooks() {
+	private function define_admin_hooks()
+	{
 
-		$plugin_admin = new Team_View_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new Team_View_Admin($this->get_plugin_name(), $this->get_version());
 
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
+		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
 
 		// Custom CMB2 field.
-		$this->loader->add_action( 'cmb2_render_social_links', $plugin_admin, 'render_callback_for_social_links', 10, 5 );
-		$this->loader->add_filter( 'cmb2_sanitize_social_links', $plugin_admin, 'sanitize_social_links', 10, 2 );
+		$this->loader->add_action('cmb2_render_social_links', $plugin_admin, 'render_callback_for_social_links', 10, 5);
+		$this->loader->add_filter('cmb2_sanitize_social_links', $plugin_admin, 'sanitize_social_links', 10, 2);
 
 		// Add metabox.
-		$this->loader->add_action( 'cmb2_admin_init', $plugin_admin, 'add_metabox' );
-
+		$this->loader->add_action('cmb2_admin_init', $plugin_admin, 'add_metabox');
 	}
 
 	/**
@@ -170,16 +161,16 @@ class Team_View {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_public_hooks() {
+	private function define_public_hooks()
+	{
 
-		$plugin_public = new Team_View_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new Team_View_Public($this->get_plugin_name(), $this->get_version());
 
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
+		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
 
 		// Register custom post type.
-		$this->loader->add_action( 'init', $plugin_public, 'custom_post_types' );
-
+		$this->loader->add_action('init', $plugin_public, 'custom_post_types');
 	}
 
 	/**
@@ -187,7 +178,8 @@ class Team_View {
 	 *
 	 * @since    1.0.0
 	 */
-	public function run() {
+	public function run()
+	{
 		$this->loader->run();
 	}
 
@@ -198,7 +190,8 @@ class Team_View {
 	 * @since     1.0.0
 	 * @return    string    The name of the plugin.
 	 */
-	public function get_plugin_name() {
+	public function get_plugin_name()
+	{
 		return $this->plugin_name;
 	}
 
@@ -208,7 +201,8 @@ class Team_View {
 	 * @since     1.0.0
 	 * @return    Team_View_Loader    Orchestrates the hooks of the plugin.
 	 */
-	public function get_loader() {
+	public function get_loader()
+	{
 		return $this->loader;
 	}
 
@@ -218,8 +212,8 @@ class Team_View {
 	 * @since     1.0.0
 	 * @return    string    The version number of the plugin.
 	 */
-	public function get_version() {
+	public function get_version()
+	{
 		return $this->version;
 	}
-
 }

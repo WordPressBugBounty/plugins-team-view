@@ -1,4 +1,5 @@
 <?php
+
 /**
  * CMB base field type
  *
@@ -10,7 +11,8 @@
  * @license   GPL-2.0+
  * @link      http://webdevstudios.com
  */
-abstract class CMB2_Type_Base {
+abstract class CMB2_Type_Base
+{
 
 	/**
 	 * The CMB2_Types object
@@ -36,9 +38,10 @@ abstract class CMB2_Type_Base {
 	 * @param CMB2_Types $types
 	 * @param array      $args
 	 */
-	public function __construct( CMB2_Types $types, $args = array() ) {
+	public function __construct(CMB2_Types $types, $args = array())
+	{
 		$this->types = $types;
-		$args['rendered'] = isset( $args['rendered'] ) ? (bool) $args['rendered'] : true;
+		$args['rendered'] = isset($args['rendered']) ? (bool) $args['rendered'] : true;
 		$this->args = $args;
 	}
 
@@ -55,12 +58,13 @@ abstract class CMB2_Type_Base {
 	 * @param  string|CMB2_Type_Base $rendered Rendered output.
 	 * @return string|CMB2_Type_Base           Rendered output or this object.
 	 */
-	public function rendered( $rendered ) {
-		if ( $this->args['rendered'] ) {
-			return is_a( $rendered, __CLASS__ ) ? $rendered->rendered : $rendered;
+	public function rendered($rendered)
+	{
+		if ($this->args['rendered']) {
+			return is_a($rendered, __CLASS__) ? $rendered->rendered : $rendered;
 		}
 
-		$this->rendered = is_a( $rendered, __CLASS__ ) ? $rendered->rendered : $rendered;
+		$this->rendered = is_a($rendered, __CLASS__) ? $rendered->rendered : $rendered;
 
 		return $this;
 	}
@@ -70,7 +74,8 @@ abstract class CMB2_Type_Base {
 	 * @since  2.2.2
 	 * @return string Stored rendered output (if 'rendered' argument is set to false).
 	 */
-	public function get_rendered() {
+	public function get_rendered()
+	{
 		return $this->rendered;
 	}
 
@@ -82,13 +87,14 @@ abstract class CMB2_Type_Base {
 	 * @param  array  $type_args     Type override arguments
 	 * @return array                 Parsed and filtered arguments
 	 */
-	public function parse_args( $element, $type_defaults, $type_args = array() ) {
-		$type_args = empty( $type_args ) ? $this->args : $type_args;
+	public function parse_args($element, $type_defaults, $type_args = array())
+	{
+		$type_args = empty($type_args) ? $this->args : $type_args;
 
-		$field_overrides = $this->field->args( 'attributes' );
+		$field_overrides = $this->field->args('attributes');
 
-		$args = ! empty( $field_overrides )
-			? wp_parse_args( $field_overrides, $type_args )
+		$args = ! empty($field_overrides)
+			? wp_parse_args($field_overrides, $type_args)
 			: $type_args;
 
 		/**
@@ -100,9 +106,9 @@ abstract class CMB2_Type_Base {
 		 * @param array  $field             The `CMB2_Field` object.
 		 * @param object $field_type_object This `CMB2_Types` object.
 		 */
-		$args = apply_filters( "cmb2_{$element}_attributes", $args, $type_defaults, $this->field, $this->types );
+		$args = apply_filters("cmb2_{$element}_attributes", $args, $type_defaults, $this->field, $this->types);
 
-		return wp_parse_args( $args, $type_defaults );
+		return wp_parse_args($args, $type_defaults);
 	}
 
 	/**
@@ -111,16 +117,24 @@ abstract class CMB2_Type_Base {
 	 * @throws Exception Throws an exception if the field is invalid.
 	 * @return mixed
 	 */
-	public function __call( $name, $arguments ) {
-		switch ( $name ) {
+	public function __call($name, $arguments)
+	{
+		switch ($name) {
 			case '_id':
 			case '_name':
 			case '_desc':
 			case '_text':
 			case 'concat_attrs':
-				return call_user_func_array( array( $this->types, $name ), $arguments );
+				return call_user_func_array(array($this->types, $name), $arguments);
 			default:
-				throw new Exception( sprintf( esc_html__( 'Invalid %1$s method: %2$s', 'team-view' ), __CLASS__, $name ) );
+				throw new Exception(sprintf(
+					wp_kses_post(
+						// Translators: %1$s is a invalid method.
+						__('Invalid %1$s method: %2$s', 'team-view'),
+						__CLASS__,
+						$name
+					)
+				));
 		}
 	}
 
@@ -130,13 +144,20 @@ abstract class CMB2_Type_Base {
 	 * @throws Exception Throws an exception if the field is invalid.
 	 * @return mixed
 	 */
-	public function __get( $field ) {
-		switch ( $field ) {
+	public function __get($field)
+	{
+		switch ($field) {
 			case 'field':
 				return $this->types->field;
 			default:
-				throw new Exception( sprintf( esc_html__( 'Invalid %1$s property: %2$s', 'team-view' ), __CLASS__, $field ) );
+				throw new Exception(sprintf(
+					wp_kses_post(
+						// Translators: %1$s is a invalid method.
+						__('Invalid %1$s property: %2$s', 'team-view'),
+						__CLASS__,
+						$field
+					)
+				));
 		}
 	}
-
 }

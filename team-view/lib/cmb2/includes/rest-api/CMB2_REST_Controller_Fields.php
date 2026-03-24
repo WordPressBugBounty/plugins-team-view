@@ -1,4 +1,5 @@
 <?php
+
 /**
  * CMB2 objects/fields endpoint for WordPres REST API.
  * Allows access to fields registered to a specific box.
@@ -14,67 +15,69 @@
  * @license   GPL-2.0+
  * @link      http://webdevstudios.com
  */
-class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
+class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes
+{
 
 	/**
 	 * Register the routes for the objects of the controller.
 	 *
 	 * @since 2.2.3
 	 */
-	public function register_routes() {
+	public function register_routes()
+	{
 		$args = array(
 			'_embed' => array(
-				'description' => __( 'Includes the box object which the fields are registered to in the response.', 'team-view' ),
+				'description' => __('Includes the box object which the fields are registered to in the response.', 'team-view'),
 			),
 			'_rendered' => array(
-				'description' => __( 'When the \'_rendered\' argument is passed, the renderable field attributes will be returned fully rendered. By default, the names of the callback handers for the renderable attributes will be returned.', 'team-view' ),
+				'description' => __('When the \'_rendered\' argument is passed, the renderable field attributes will be returned fully rendered. By default, the names of the callback handers for the renderable attributes will be returned.', 'team-view'),
 			),
 			'object_id' => array(
-				'description' => __( 'To view or modify the field\'s value, the \'object_id\' and \'object_type\' arguments are required.', 'team-view' ),
+				'description' => __('To view or modify the field\'s value, the \'object_id\' and \'object_type\' arguments are required.', 'team-view'),
 			),
 			'object_type' => array(
-				'description' => __( 'To view or modify the field\'s value, the \'object_id\' and \'object_type\' arguments are required.', 'team-view' ),
+				'description' => __('To view or modify the field\'s value, the \'object_id\' and \'object_type\' arguments are required.', 'team-view'),
 			),
 		);
 
 		// Returns specific box's fields.
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<cmb_id>[\w-]+)/fields/', array(
+		register_rest_route($this->namespace, '/' . $this->rest_base . '/(?P<cmb_id>[\w-]+)/fields/', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'callback'            => array( $this, 'get_items' ),
+				'permission_callback' => array($this, 'get_items_permissions_check'),
+				'callback'            => array($this, 'get_items'),
 				'args'                => $args,
 			),
-			'schema' => array( $this, 'get_item_schema' ),
-		) );
+			'schema' => array($this, 'get_item_schema'),
+		));
 
 		$delete_args = $args;
 		$delete_args['object_id']['required'] = true;
 		$delete_args['object_type']['required'] = true;
 
 		// Returns specific field data.
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<cmb_id>[\w-]+)/fields/(?P<field_id>[\w-]+)', array(
+		register_rest_route($this->namespace, '/' . $this->rest_base . '/(?P<cmb_id>[\w-]+)/fields/(?P<field_id>[\w-]+)', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'permission_callback' => array( $this, 'get_item_permissions_check' ),
-				'callback'            => array( $this, 'get_item' ),
+				'permission_callback' => array($this, 'get_item_permissions_check'),
+				'callback'            => array($this, 'get_item'),
 				'args'                => $args,
 			),
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
-				'permission_callback' => array( $this, 'update_item_permissions_check' ),
-				'callback'            => array( $this, 'update_item' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				'permission_callback' => array($this, 'update_item_permissions_check'),
+				'callback'            => array($this, 'update_item'),
+				'args'                => $this->get_endpoint_args_for_item_schema(WP_REST_Server::EDITABLE),
 				'args'                => $args,
 			),
 			array(
 				'methods'             => WP_REST_Server::DELETABLE,
-				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
-				'callback'            => array( $this, 'delete_item' ),
+				'permission_callback' => array($this, 'delete_item_permissions_check'),
+				'callback'            => array($this, 'delete_item'),
 				'args'                => $delete_args,
 			),
-			'schema' => array( $this, 'get_item_schema' ),
-		) );
+			'schema' => array($this, 'get_item_schema'),
+		));
 	}
 
 	/**
@@ -86,8 +89,9 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 * @param  WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_items_permissions_check( $request ) {
-		$this->initiate_rest_read_box( $request, 'fields_read' );
+	public function get_items_permissions_check($request)
+	{
+		$this->initiate_rest_read_box($request, 'fields_read');
 		$can_access = true;
 
 		/**
@@ -98,7 +102,7 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 		 * @param bool   $can_access Whether this CMB2 endpoint can be accessed.
 		 * @param object $controller This CMB2_REST_Controller object.
 		 */
-		return $this->maybe_hook_callback_and_apply_filters( 'cmb2_api_get_fields_permissions_check', $can_access );
+		return $this->maybe_hook_callback_and_apply_filters('cmb2_api_get_fields_permissions_check', $can_access);
 	}
 
 	/**
@@ -109,31 +113,32 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 * @param  WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function get_items( $request ) {
-		if ( ! $this->rest_box ) {
-			$this->initiate_rest_read_box( $request, 'fields_read' );
+	public function get_items($request)
+	{
+		if (! $this->rest_box) {
+			$this->initiate_rest_read_box($request, 'fields_read');
 		}
 
-		if ( is_wp_error( $this->rest_box ) ) {
+		if (is_wp_error($this->rest_box)) {
 			return $this->rest_box;
 		}
 
 		$fields = array();
-		foreach ( $this->rest_box->cmb->prop( 'fields', array() ) as $field ) {
+		foreach ($this->rest_box->cmb->prop('fields', array()) as $field) {
 
 			// Make sure this field can be read.
-			$this->field = $this->rest_box->field_can_read( $field['id'], true );
+			$this->field = $this->rest_box->field_can_read($field['id'], true);
 
 			// And make sure current user can view this box.
-			if ( $this->field && $this->get_item_permissions_check_filter() ) {
-				$fields[ $field['id'] ] = $this->server->response_to_data(
+			if ($this->field && $this->get_item_permissions_check_filter()) {
+				$fields[$field['id']] = $this->server->response_to_data(
 					$this->prepare_field_response(),
-					isset( $this->request['_embed'] )
+					isset($this->request['_embed'])
 				);
 			}
 		}
 
-		return $this->prepare_item( $fields );
+		return $this->prepare_item($fields);
 	}
 
 	/**
@@ -145,10 +150,11 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_item_permissions_check( $request ) {
-		$this->initiate_rest_read_box( $request, 'field_read' );
-		if ( ! is_wp_error( $this->rest_box ) ) {
-			$this->field = $this->rest_box->field_can_read( $this->request->get_param( 'field_id' ), true );
+	public function get_item_permissions_check($request)
+	{
+		$this->initiate_rest_read_box($request, 'field_read');
+		if (! is_wp_error($this->rest_box)) {
+			$this->field = $this->rest_box->field_can_read($this->request->get_param('field_id'), true);
 		}
 
 		return $this->get_item_permissions_check_filter();
@@ -163,7 +169,8 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 * @param  bool $can_access Whether the current request has access to view the field by default.
 	 * @return WP_Error|boolean
 	 */
-	public function get_item_permissions_check_filter( $can_access = true ) {
+	public function get_item_permissions_check_filter($can_access = true)
+	{
 		/**
 		 * By default, no special permissions needed.
 		 *
@@ -172,7 +179,7 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 		 * @param bool   $can_access Whether this CMB2 endpoint can be accessed.
 		 * @param object $controller This CMB2_REST_Controller object.
 		 */
-		return $this->maybe_hook_callback_and_apply_filters( 'cmb2_api_get_field_permissions_check', $can_access );
+		return $this->maybe_hook_callback_and_apply_filters('cmb2_api_get_field_permissions_check', $can_access);
 	}
 
 	/**
@@ -183,14 +190,15 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 * @param  WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function get_item( $request ) {
-		$this->initiate_rest_read_box( $request, 'field_read' );
+	public function get_item($request)
+	{
+		$this->initiate_rest_read_box($request, 'field_read');
 
-		if ( is_wp_error( $this->rest_box ) ) {
+		if (is_wp_error($this->rest_box)) {
 			return $this->rest_box;
 		}
 
-		return $this->prepare_read_field( $this->request->get_param( 'field_id' ) );
+		return $this->prepare_read_field($this->request->get_param('field_id'));
 	}
 
 	/**
@@ -202,13 +210,14 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function update_item_permissions_check( $request ) {
-		$this->initiate_rest_read_box( $request, 'field_value_update' );
-		if ( ! is_wp_error( $this->rest_box ) ) {
-			$this->field = $this->rest_box->field_can_edit( $this->request->get_param( 'field_id' ), true );
+	public function update_item_permissions_check($request)
+	{
+		$this->initiate_rest_read_box($request, 'field_value_update');
+		if (! is_wp_error($this->rest_box)) {
+			$this->field = $this->rest_box->field_can_edit($this->request->get_param('field_id'), true);
 		}
 
-		$can_update = current_user_can( 'edit_others_posts' );
+		$can_update = current_user_can('edit_others_posts');
 
 		/**
 		 * By default, 'edit_others_posts' is required capability.
@@ -218,7 +227,7 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 		 * @param bool   $can_update Whether this CMB2 endpoint can be accessed.
 		 * @param object $controller This CMB2_REST_Controller object.
 		 */
-		return $this->maybe_hook_callback_and_apply_filters( 'cmb2_api_update_field_value_permissions_check', $can_update );
+		return $this->maybe_hook_callback_and_apply_filters('cmb2_api_update_field_value_permissions_check', $can_update);
 	}
 
 	/**
@@ -229,14 +238,15 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 * @param  WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function update_item( $request ) {
-		$this->initiate_rest_read_box( $request, 'field_value_update' );
+	public function update_item($request)
+	{
+		$this->initiate_rest_read_box($request, 'field_value_update');
 
-		if ( ! $this->request['value'] ) {
-			return new WP_Error( 'cmb2_rest_update_field_error', __( 'CMB2 Field value cannot be updated without the value parameter specified.', 'team-view' ), array( 'status' => 400 ) );
+		if (! $this->request['value']) {
+			return new WP_Error('cmb2_rest_update_field_error', __('CMB2 Field value cannot be updated without the value parameter specified.', 'team-view'), array('status' => 400));
 		}
 
-		return $this->modify_field_value( 'updated' );
+		return $this->modify_field_value('updated');
 	}
 
 	/**
@@ -248,13 +258,14 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function delete_item_permissions_check( $request ) {
-		$this->initiate_rest_read_box( $request, 'field_value_delete' );
-		if ( ! is_wp_error( $this->rest_box ) ) {
-			$this->field = $this->rest_box->field_can_edit( $this->request->get_param( 'field_id' ), true );
+	public function delete_item_permissions_check($request)
+	{
+		$this->initiate_rest_read_box($request, 'field_value_delete');
+		if (! is_wp_error($this->rest_box)) {
+			$this->field = $this->rest_box->field_can_edit($this->request->get_param('field_id'), true);
 		}
 
-		$can_delete = current_user_can( 'delete_others_posts' );
+		$can_delete = current_user_can('delete_others_posts');
 
 		/**
 		 * By default, 'delete_others_posts' is required capability.
@@ -264,7 +275,7 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 		 * @param bool   $can_delete Whether this CMB2 endpoint can be accessed.
 		 * @param object $controller This CMB2_REST_Controller object.
 		 */
-		return $this->maybe_hook_callback_and_apply_filters( 'cmb2_api_delete_field_value_permissions_check', $can_delete );
+		return $this->maybe_hook_callback_and_apply_filters('cmb2_api_delete_field_value_permissions_check', $can_delete);
 	}
 
 	/**
@@ -275,10 +286,11 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 * @param  WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function delete_item( $request ) {
-		$this->initiate_rest_read_box( $request, 'field_value_delete' );
+	public function delete_item($request)
+	{
+		$this->initiate_rest_read_box($request, 'field_value_delete');
 
-		return $this->modify_field_value( 'deleted' );
+		return $this->modify_field_value('deleted');
 	}
 
 	/**
@@ -289,35 +301,36 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 * @param  string $activity The modification activity (updated or deleted).
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function modify_field_value( $activity) {
+	public function modify_field_value($activity)
+	{
 
-		if ( ! $this->request['object_id'] || ! $this->request['object_type'] ) {
-			return new WP_Error( 'cmb2_rest_modify_field_value_error', __( 'CMB2 Field value cannot be modified without the object_id and object_type parameters specified.', 'team-view' ), array( 'status' => 400 ) );
+		if (! $this->request['object_id'] || ! $this->request['object_type']) {
+			return new WP_Error('cmb2_rest_modify_field_value_error', __('CMB2 Field value cannot be modified without the object_id and object_type parameters specified.', 'team-view'), array('status' => 400));
 		}
 
-		if ( is_wp_error( $this->rest_box ) ) {
+		if (is_wp_error($this->rest_box)) {
 			return $this->rest_box;
 		}
 
 		$this->field = $this->rest_box->field_can_edit(
-			$this->field ? $this->field : $this->request->get_param( 'field_id' ),
+			$this->field ? $this->field : $this->request->get_param('field_id'),
 			true
 		);
 
-		if ( ! $this->field ) {
-			return new WP_Error( 'cmb2_rest_no_field_by_id_error', __( 'No field found by that id.', 'team-view' ), array( 'status' => 403 ) );
+		if (! $this->field) {
+			return new WP_Error('cmb2_rest_no_field_by_id_error', __('No field found by that id.', 'team-view'), array('status' => 403));
 		}
 
 		$this->field->args["value_{$activity}"] = (bool) 'deleted' === $activity
 			? $this->field->remove_data()
-			: $this->field->save_field( $this->request['value'] );
+			: $this->field->save_field($this->request['value']);
 
 		// If options page, save the $activity options
-		if ( 'options-page' == $this->request['object_type'] ) {
-			$this->field->args["value_{$activity}"] = cmb2_options( $this->request['object_id'] )->set();
+		if ('options-page' == $this->request['object_type']) {
+			$this->field->args["value_{$activity}"] = cmb2_options($this->request['object_id'])->set();
 		}
 
-		return $this->prepare_read_field( $this->field );
+		return $this->prepare_read_field($this->field);
 	}
 
 	/**
@@ -328,14 +341,15 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 * @param  string\CMB2_Field Field id or Field object.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function prepare_read_field( $field ) {
-		$this->field = $this->rest_box->field_can_read( $field, true );
+	public function prepare_read_field($field)
+	{
+		$this->field = $this->rest_box->field_can_read($field, true);
 
-		if ( ! $this->field ) {
-			return new WP_Error( 'cmb2_rest_no_field_by_id_error', __( 'No field found by that id.', 'team-view' ), array( 'status' => 403 ) );
+		if (! $this->field) {
+			return new WP_Error('cmb2_rest_no_field_by_id_error', __('No field found by that id.', 'team-view'), array('status' => 403));
 		}
 
-		return $this->prepare_item( $this->prepare_field_response() );
+		return $this->prepare_item($this->prepare_field_response());
 	}
 
 	/**
@@ -346,11 +360,12 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 * @param  CMB2_Field Field object.
 	 * @return array      Response array.
 	 */
-	public function prepare_field_response() {
-		$field_data = $this->prepare_field_data( $this->field );
-		$response = rest_ensure_response( $field_data );
+	public function prepare_field_response()
+	{
+		$field_data = $this->prepare_field_data($this->field);
+		$response = rest_ensure_response($field_data);
 
-		$response->add_links( $this->prepare_links( $this->field ) );
+		$response->add_links($this->prepare_links($this->field));
 
 		return $response;
 	}
@@ -364,51 +379,56 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 *
 	 * @return array             Array of field data.
 	 */
-	protected function prepare_field_data( CMB2_Field $field ) {
+	protected function prepare_field_data(CMB2_Field $field)
+	{
 		$field_data = array();
-		$params_to_ignore = array( 'show_in_rest', 'options' );
+		$params_to_ignore = array('show_in_rest', 'options');
 		$params_to_rename = array(
 			'label_cb' => 'label',
 			'options_cb' => 'options',
 		);
 
 		// Run this first so the js_dependencies arg is populated.
-		$rendered = ( $cb = $field->maybe_callback( 'render_row_cb' ) )
+		$rendered = ($cb = $field->maybe_callback('render_row_cb'))
 			// Ok, callback is good, let's run it.
-			? $this->get_cb_results( $cb, $field->args(), $field )
+			? $this->get_cb_results($cb, $field->args(), $field)
 			: false;
 
 		$field_args = $field->args();
 
-		foreach ( $field_args as $key => $value ) {
-			if ( in_array( $key, $params_to_ignore, true ) ) {
+		foreach ($field_args as $key => $value) {
+			if (in_array($key, $params_to_ignore, true)) {
 				continue;
 			}
 
-			if ( 'options_cb' === $key ) {
+			if ('options_cb' === $key) {
 				$value = $field->options();
-			} elseif ( in_array( $key, CMB2_Field::$callable_fields, true ) ) {
+			} elseif (in_array($key, CMB2_Field::$callable_fields, true)) {
 
-				if ( isset( $this->request['_rendered'] ) ) {
-					$value = $key === 'render_row_cb' ? $rendered : $field->get_param_callback_result( $key );
-				} elseif ( is_array( $value ) ) {
+				if (isset($this->request['_rendered'])) {
+					$value = $key === 'render_row_cb' ? $rendered : $field->get_param_callback_result($key);
+				} elseif (is_array($value)) {
 					// We need to rewrite callbacks as string as they will cause
 					// JSON recursion errors.
-					$class = is_string( $value[0] ) ? $value[0] : get_class( $value[0] );
+					$class = is_string($value[0]) ? $value[0] : get_class($value[0]);
 					$value = $class . '::' . $value[1];
 				}
 			}
 
-			$key = isset( $params_to_rename[ $key ] ) ? $params_to_rename[ $key ] : $key;
+			$key = isset($params_to_rename[$key]) ? $params_to_rename[$key] : $key;
 
-			if ( empty( $value ) || is_scalar( $value ) || is_array( $value ) ) {
-				$field_data[ $key ] = $value;
+			if (empty($value) || is_scalar($value) || is_array($value)) {
+				$field_data[$key] = $value;
 			} else {
-				$field_data[ $key ] = sprintf( __( 'Value Error for %s', 'team-view' ), $key );
+				$field_data[$key] = sprintf(
+					// Translators: %s is a key where error occured.
+					__('Value Error for %s', 'team-view'),
+					$key
+				);
 			}
 		}
 
-		if ( $this->request['object_id'] && $this->request['object_type'] ) {
+		if ($this->request['object_id'] && $this->request['object_type']) {
 			$field_data['value'] = $field->get_data();
 		}
 
@@ -424,20 +444,21 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 *
 	 * @return array             Array of links
 	 */
-	protected function prepare_links( $field ) {
+	protected function prepare_links($field)
+	{
 		$boxbase      = $this->namespace_base . '/' . $this->rest_box->cmb->cmb_id;
 		$query_string = $this->get_query_string();
 
 		$links = array(
 			'self' => array(
-				'href' => rest_url( trailingslashit( $boxbase ) . 'fields/' . $field->_id() . $query_string ),
+				'href' => rest_url(trailingslashit($boxbase) . 'fields/' . $field->_id() . $query_string),
 			),
 			'collection' => array(
-				'href' => rest_url( trailingslashit( $boxbase ) . 'fields' . $query_string ),
+				'href' => rest_url(trailingslashit($boxbase) . 'fields' . $query_string),
 			),
 			'up' => array(
 				'embeddable' => true,
-				'href' => rest_url( $boxbase . $query_string ),
+				'href' => rest_url($boxbase . $query_string),
 			),
 		);
 
@@ -458,14 +479,15 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 *
 	 * @return bool                The possibly-modified filter value (if the _cb param is a non-callable).
 	 */
-	public function maybe_hook_registered_callback( $filter, $default_val ) {
-		$default_val = parent::maybe_hook_registered_callback( $filter, $default_val );
+	public function maybe_hook_registered_callback($filter, $default_val)
+	{
+		$default_val = parent::maybe_hook_registered_callback($filter, $default_val);
 
-		if ( $this->field ) {
+		if ($this->field) {
 
 			// Hook field specific filter callbacks.
-			$val = $this->field->maybe_hook_parameter( $filter, $default_val );
-			if ( null !== $val ) {
+			$val = $this->field->maybe_hook_parameter($filter, $default_val);
+			if (null !== $val) {
 				$default_val = $val;
 			}
 		}
@@ -482,13 +504,13 @@ class CMB2_REST_Controller_Fields extends CMB2_REST_Controller_Boxes {
 	 *
 	 * @return void
 	 */
-	public function maybe_unhook_registered_callback( $filter ) {
-		parent::maybe_unhook_registered_callback( $filter );
+	public function maybe_unhook_registered_callback($filter)
+	{
+		parent::maybe_unhook_registered_callback($filter);
 
-		if ( $this->field ) {
+		if ($this->field) {
 			// Unhook field specific filter callbacks.
-			$this->field->maybe_hook_parameter( $filter, null, 'remove_filter' );
+			$this->field->maybe_hook_parameter($filter, null, 'remove_filter');
 		}
 	}
-
 }
